@@ -46,6 +46,8 @@ export default function OrderedFoodItems(props) {
   const removeFoodItem = (index, id) => {
     let x = {...values};
     x.orderDetails = x.orderDetails.filter((_, i) => i !== index);
+    if(id !== 0)
+      x.deleteOrderItemIds += id + ',';
     setValues({...x});
   }
 

@@ -37,7 +37,8 @@ export default function Order() {
             setValues,
             errors,
             setErrors,
-            handleInputChange
+            handleInputChange,
+            resetFormControls
           }}
         />
       </Grid>

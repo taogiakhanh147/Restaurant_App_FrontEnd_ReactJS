@@ -8,6 +8,9 @@ import RestaurantTwoToneIcon from '@mui/icons-material/RestaurantTwoTone';
 import ReorderIcon from '@mui/icons-material/Reorder';
 import { createAPIEndpoint, ENDPOINTS } from '../../api';
 import { roundTo2DecimalPoint } from '../../utils';
+import Popup from '../../layouts/Popup';
+import OrderList from './OrderList';
+import Notification from '../../layouts/Notification';
 
 const pMethods = [
   {id: 'none', title: 'Select'},
@@ -38,10 +41,16 @@ export default function OrderForm(props) {
     setValues,
     errors,
     setErrors,
-    handleInputChange
+    handleInputChange,
+    resetFormControls
   } = props;
+
   const classes = useStyles();
+
   const [customerList, setCustomerList] = useState([]);
+  const [orderListVisibility, setOrderListVisibility] = useState(false);
+  const [orderId, setOrderId] = useState(0);
+  const [notify, setNotify] = useState({isOpen: false});
 
   useEffect(() => {
     createAPIEndpoint(ENDPOINTS.CUSTOMER).fetchAll()
@@ -66,6 +75,18 @@ export default function OrderForm(props) {
     })
   }, [JSON.stringify(values.orderDetails)]);
 
+  useEffect(() => {
+    if(orderId === 0) resetFormControls()
+    else {
+      createAPIEndpoint(ENDPOINTS.ORDER).fetchById(orderId)
+      .then(res => {
+        setValues(res.data);
+        setErrors({});
+      })
+      .catch(err => console.log(err));
+    }
+  }, [orderId]);
+
   const validateForm = () => {
     let temp = {};
     temp.customerId = values.customerId !== 0 ? "" : "This field is required !";
@@ -75,87 +96,127 @@ export default function OrderForm(props) {
     return Object.values(temp).every(x => x === "");
   }
 
+  const resetForm = () => {
+    resetFormControls();
+    setOrderId(0);
+  }
+
   const submitOrder = e => {
     e.preventDefault();
     if(validateForm()) {
-
+      if(values.orderMasterId === 0) {
+        createAPIEndpoint(ENDPOINTS.ORDER).create(values)
+        .then(res => {
+          resetFormControls();
+          setNotify({isOpen: true, message: 'New order is created.'});
+        })
+        .catch(err => console.log(err));
+      }
+      else {
+        createAPIEndpoint(ENDPOINTS.ORDER).update(values.orderMasterId,values)
+        .then(res => {
+          setOrderId(0);
+          setNotify({isOpen: true, message: 'New order is updated.'});
+        })
+        .catch(err => console.log(err));
+      }
     }
   }
 
+  const openListOfOrders = () => {
+    setOrderListVisibility(true);
+  }
+
   return (
-    <Form onSubmit={submitOrder}>
-      <Grid container spacing={2}>
-        <Grid item xs={6}>
-          <Input
-            disabled
-            label = "Order Number"
-            name = "orderNumber"
-            value = {values.orderNumber}
-            InputProps = {{
-              startAdornment : 
-              <InputAdornment
-                className={classes.adornmentText}
-                position='start'
-              >
-                #
-              </InputAdornment>
-            }}
-          />
-          <Select
-            label = "Customer"
-            name = "customerId"
-            value = {values.customerId}
-            onChange = {handleInputChange}
-            options = {customerList}
-            error = {errors.customerId}
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <Select
-            label = "Payment Method"
-            name = "pMethod"
-            onChange = {handleInputChange}
-            options = {pMethods}
-            value = {values.pMethod}
-            error = {errors.pMethod}
-          />
-          <Input
+    <>
+      <Form onSubmit={submitOrder}>
+        <Grid container spacing={2}>
+          <Grid item xs={6}>
+            <Input
               disabled
-              label = "Grand Total"
-              name = "gTotal"
-              value = {values.gTotal}
+              label = "Order Number"
+              name = "orderNumber"
+              value = {values.orderNumber}
               InputProps = {{
                 startAdornment : 
                 <InputAdornment
                   className={classes.adornmentText}
                   position='start'
                 >
-                  $
+                  #
                 </InputAdornment>
               }}
             />
-            <ButtonGroup className={classes.submitButtonGroup}>
-              <MuiButton
+            <Select
+              label = "Customer"
+              name = "customerId"
+              value = {values.customerId}
+              onChange = {handleInputChange}
+              options = {customerList}
+              error = {errors.customerId}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <Select
+              label = "Payment Method"
+              name = "pMethod"
+              onChange = {handleInputChange}
+              options = {pMethods}
+              value = {values.pMethod}
+              error = {errors.pMethod}
+            />
+            <Input
+                disabled
+                label = "Grand Total"
+                name = "gTotal"
+                value = {values.gTotal}
+                InputProps = {{
+                  startAdornment : 
+                  <InputAdornment
+                    className={classes.adornmentText}
+                    position='start'
+                  >
+                    $
+                  </InputAdornment>
+                }}
+              />
+              <ButtonGroup className={classes.submitButtonGroup}>
+                <MuiButton
+                  size="large"
+                  type="submit"
+                  endIcon={<RestaurantTwoToneIcon />}
+                >
+                  Submit
+                </MuiButton>
+                <MuiButton
+                  size="small"
+                  onClick={resetForm}
+                  startIcon={<ReplayIcon />}
+                >
+                </MuiButton>
+              </ButtonGroup>
+              <Button
                 size="large"
-                type="submit"
-                endIcon={<RestaurantTwoToneIcon />}
+                onClick = {openListOfOrders}
+                startIcon={<ReorderIcon />}
               >
-                Submit
-              </MuiButton>
-              <MuiButton
-                size="small"
-                startIcon={<ReplayIcon />}
-              >
-              </MuiButton>
-            </ButtonGroup>
-            <Button
-              size="large"
-              startIcon={<ReorderIcon />}
-            >
-              Order
-            </Button>
+                Order
+              </Button>
+          </Grid>
         </Grid>
-      </Grid>
-    </Form>
+      </Form>
+      <Popup
+        title = "List of Orders"
+        openPopup = {orderListVisibility}
+        setOpenPopup = {setOrderListVisibility}
+      >
+        <OrderList 
+          {...{setOrderId, setOrderListVisibility, resetFormControls, setNotify}}
+        />
+      </Popup>
+      <Notification 
+        {...{notify, setNotify}}
+      />
+    </>
   )
 }
