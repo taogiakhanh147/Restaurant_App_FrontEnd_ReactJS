@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = 'https://localhost:8888/swagger/api/' 
+const BASE_URL = 'http://localhost:5273/api/'
 
 export const ENDPOINTS = {
     CUSTOMER: 'Customer',
