@@ -44,7 +44,7 @@ export default function OrderList(props) {
                 <TableCell>Customer</TableCell>
                 <TableCell>Payed With</TableCell>
                 <TableCell>Grand Total</TableCell>
-                <TableCell></TableCell>
+                <TableCell>Action</TableCell>
             </TableRow>
         </TableHead>
         <TableBody>
@@ -74,6 +74,7 @@ export default function OrderList(props) {
                      <TableCell>
                          <DeleteOutlineTwoToneIcon 
                             onClick = {e => deleteOrder(item.orderMasterId)}
+                            style={{color: 'red'}}
                          />
                      </TableCell>
                  </TableRow>    

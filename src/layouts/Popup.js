@@ -39,7 +39,7 @@ export default function Popup(props) {
                     <IconButton 
                         onClick={() => {setOpenPopup(false)}}
                     >
-
+                        x
                     </IconButton>
                 </div>
             </DialogTitle>

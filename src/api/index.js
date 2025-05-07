@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = 'http://localhost:5273/api/'
+const BASE_URL = 'https://restaurant-app-backend-net-2.onrender.com/api/'
 
 export const ENDPOINTS = {
     CUSTOMER: 'Customer',

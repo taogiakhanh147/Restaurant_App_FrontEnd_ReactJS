@@ -47,7 +47,9 @@ export default function OrderedFoodItems(props) {
     let x = {...values};
     x.orderDetails = x.orderDetails.filter((_, i) => i !== index);
     if(id !== 0)
+    {
       x.deleteOrderItemIds += id + ',';
+    }
     setValues({...x});
   }
 
@@ -119,7 +121,7 @@ export default function OrderedFoodItems(props) {
               >
                 <IconButton 
                   disableRipple
-                  onClick={e => removeFoodItem(idx, item.orderDetailsId)}
+                  onClick={e => removeFoodItem(idx, item.orderDetailId)}
                 >
                   <DeleteOutlineTwoToneIcon />
                 </IconButton>
